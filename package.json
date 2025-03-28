@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "exceljs": "^4.4.0",
+    "xmlhttprequest": "^1.8.0"
+  }
+}
