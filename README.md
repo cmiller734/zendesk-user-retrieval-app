@@ -9,12 +9,16 @@ The scripts can be used to create custom sales and marketing material for small 
 
 ## Usage ##
 
-The scripts each take four inputs:
+The scripts now expect Zendesk credentials from environment variables:
 
-process.argv[2] → Zendesk API username
-process.argv[3] → Zendesk API password
-process.argv[4] → Number of months of data to pull
-process.argv[5] → Zendesk subdomain name
+`ZENDESK_EMAIL` → Zendesk API username/email
+`ZENDESK_PASSWORD` → Zendesk API password
+`ZENDESK_SUBDOMAIN` → Zendesk subdomain name
+
+The scripts take:
+
+`process.argv[2]` → Number of months of data to pull
+`process.argv[3]` → Optional Zendesk subdomain name if `ZENDESK_SUBDOMAIN` is not set
 
 ### Step 1: install Node ###
 
@@ -29,5 +33,11 @@ npm install fs
 
 ### Step 3: run with necessary parameters ###
 
-node activeCompaniesUserListByTickets username password 12 mySubdomain
-node userListByTickets username password 12 mySubdomain
+```bash
+export ZENDESK_EMAIL="username"
+export ZENDESK_PASSWORD="password"
+export ZENDESK_SUBDOMAIN="mySubdomain"
+
+node activeCompaniesUserListByTickets.js 12
+node userListByTickets.js 12
+```

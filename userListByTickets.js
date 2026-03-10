@@ -1,7 +1,7 @@
-// usage: node userListByTickets ${zendeskApiUsername} ${zendeskApiPassword} ${numMonthsToPull}
+// usage: node userListByTickets ${numMonthsToPull} ${subdomainName}
 // this script retrieves a list of active users from a Zendesk account over a specified period (in months) and outputs the data to an Excel file
 
-// e.g. node userListByTickets john.doe@company.com aFakePassword123 12 myZendeskSubdomain
+// e.g. node userListByTickets 12 myZendeskSubdomain
 
 //TODO - optimize so that you always get all 10 pages
 
@@ -10,7 +10,9 @@ const requestHandler = require(`./helper-functions/handle-request`);
 const dateHandler = require(`./helper-functions/get-past-date`);
 const jsonToExcelConverter = require(`./helper-functions/json-to-excel-file.js`);
 const chalk = require('chalk');
-const subdomainName = process.argv[5]
+const legacyCliMode = process.argv[5] !== undefined
+const numMonthsToPull = legacyCliMode ? process.argv[4] : process.argv[2]
+const subdomainName = process.env.ZENDESK_SUBDOMAIN || (legacyCliMode ? process.argv[5] : process.argv[3])
 
 var dateXMonthsAgoAsString = ''
 var dateXMonthsAgoPlusOne = ''
@@ -21,12 +23,16 @@ var maxPgNum = 10; //see https://developer.zendesk.com/rest_api/docs/support/sea
 const getAllRequesterIds = async () => {
     console.log('start method getAllRequesterIds')
     const allRequesterIdsArr = [];
-    for (var numMonths = process.argv[4]; 0 < numMonths; numMonths--) {
+    for (var numMonths = numMonthsToPull; 0 < numMonths; numMonths--) {
         var requesterIdsByMonth = await getRequesterIdsByMonth(numMonths)
         allRequesterIdsArr.push(requesterIdsByMonth)
     }
     console.log('finish method getAllRequesterIds')
     return allRequesterIdsArr
+}
+
+if (!subdomainName) {
+    throw new Error('Missing Zendesk subdomain. Pass it as a CLI argument or set ZENDESK_SUBDOMAIN.')
 }
 const getRequesterIdsByMonth = async (monthNum) => {
     console.log("start function getRequesterIdsByMonth")

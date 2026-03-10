@@ -2,10 +2,17 @@
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const chalk = require('chalk')
 var xhttp;
-var username = process.argv[2];
-var password = process.argv[3];
+var username = process.env.ZENDESK_EMAIL || process.env.ZENDESK_USERNAME;
+var password = process.env.ZENDESK_PASSWORD;
+
+const ensureCredentials = () => {
+    if (!username || !password) {
+        throw new Error('Missing Zendesk credentials. Set ZENDESK_EMAIL (or ZENDESK_USERNAME) and ZENDESK_PASSWORD.');
+    }
+}
 
 const handleRequest = (method, path, payload = {}) => {
+    ensureCredentials()
     return new Promise((resolve, reject) => {
         xhttp = new XMLHttpRequest();
         xhttp.open(method, path);
@@ -26,6 +33,7 @@ const handleRequest = (method, path, payload = {}) => {
 }
 
 const handleRequestSync = (method, path, payload = {}) => {
+    ensureCredentials()
     console.log('handling request synchronously')
     xhttp = new XMLHttpRequest();
     xhttp.open(method, path, false);

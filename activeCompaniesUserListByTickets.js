@@ -1,17 +1,21 @@
-// usage: node activeCompaniesUserList ${zendeskApiUsername} ${zendeskApiPassword} ${numMonthsToPull} ${subdomainName}
+// usage: node activeCompaniesUserList ${numMonthsToPull} ${subdomainName}
 // this script retrieves a list of active users in Zendesk who have interacted (via tickets) within a specified number of months, 
 // and it outputs the data (including company names) to an Excel file
 // ${numMonthsToPull} = however many months you want to pull data for - set to 12 to get a years' worth of data
-// e.g. node activeCompaniesUserList john.doe@company.com aFakePassword123 12 xlsx
+// e.g. node activeCompaniesUserList 12 xlsx
 
 //-----PACKAGES, GLOBAL VAR, ETC-----
 const requestHandler = require(`../zendesk-get-tickets-by-org/helper-functions/handle-request`);
 const dateHandler = require(`./helper-functions/get-past-date`);
 const jsonToExcelConverter = require(`./helper-functions/json-to-excel-file.js`);
 const chalk = require('chalk');
-var numMonthsToPull = process.argv[4]; //for process.argv[2] and process.argv[3], see helper function handle-request.js
-const subdomainName = process.argv[5]
+const legacyCliMode = process.argv[5] !== undefined
+var numMonthsToPull = legacyCliMode ? process.argv[4] : process.argv[2];
+const subdomainName = process.env.ZENDESK_SUBDOMAIN || (legacyCliMode ? process.argv[5] : process.argv[3])
 var dateXMonthsAgoAsString = ''
+if (!subdomainName) {
+    throw new Error('Missing Zendesk subdomain. Pass it as a CLI argument or set ZENDESK_SUBDOMAIN.')
+}
 try {
     dateXMonthsAgoAsString = dateHandler.getDateXMonthsAgo(numMonthsToPull).toISOString();
 } catch (err) {
